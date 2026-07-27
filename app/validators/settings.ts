@@ -28,7 +28,7 @@ export const restaurantSettingsValidator = vine.create({
       vine.object({
         name: vine.string().trim().minLength(1).maxLength(60),
         cutoff: time(),
-      }),
+      })
     )
     .optional(),
 })
@@ -39,6 +39,23 @@ export const notificationsSettingsValidator = vine.create({
   whatsappEnabled: vine.boolean().optional(),
   senderEmail: vine.string().trim().email().maxLength(254).nullable().optional(),
   whatsappNumber: vine.string().trim().maxLength(40).nullable().optional(),
+  telegramEnabled: vine.boolean().optional(),
+  telegramChatId: vine.string().trim().maxLength(64).nullable().optional(),
   notifyNewOrder: vine.boolean().optional(),
   notifyStatusChange: vine.boolean().optional(),
+  /** Noms de templates Meta (lettres minuscules, chiffres et _). */
+  whatsappTemplateOrderReceived: vine
+    .string()
+    .trim()
+    .maxLength(64)
+    .regex(/^[a-z0-9_]+$/)
+    .nullable()
+    .optional(),
+  whatsappTemplateStatusChange: vine
+    .string()
+    .trim()
+    .maxLength(64)
+    .regex(/^[a-z0-9_]+$/)
+    .nullable()
+    .optional(),
 })

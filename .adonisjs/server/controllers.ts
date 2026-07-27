@@ -5,14 +5,14 @@
 
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
+  Accompaniments: () => import('#controllers/accompaniments_controller'),
   Dishes: () => import('#controllers/dishes_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Orders: () => import('#controllers/orders_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Programs: () => import('#controllers/programs_controller'),
+  PublicMenu: () => import('#controllers/public_menu_controller'),
+  PublicOrders: () => import('#controllers/public_orders_controller'),
   Settings: () => import('#controllers/settings_controller'),
   Users: () => import('#controllers/users_controller'),
-  CustomerAuth: () => import('#controllers/customer_auth_controller'),
-  Menu: () => import('#controllers/menu_controller'),
-  CustomerOrders: () => import('#controllers/customer_orders_controller'),
 }

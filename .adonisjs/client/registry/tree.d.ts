@@ -5,16 +5,23 @@ export interface ApiDefinition {
   eventStream: typeof routes['event_stream']
   subscribe: typeof routes['subscribe']
   unsubscribe: typeof routes['unsubscribe']
+  public: {
+    publicMenu: {
+      show: typeof routes['public.public_menu.show']
+      week: typeof routes['public.public_menu.week']
+      window: typeof routes['public.public_menu.window']
+    }
+    publicOrders: {
+      store: typeof routes['public.public_orders.store']
+      show: typeof routes['public.public_orders.show']
+    }
+  }
   auth: {
     newAccount: {
       store: typeof routes['auth.new_account.store']
     }
     accessTokens: {
       store: typeof routes['auth.access_tokens.store']
-    }
-    customerAuth: {
-      signup: typeof routes['auth.customer_auth.signup']
-      login: typeof routes['auth.customer_auth.login']
     }
   }
   profile: {
@@ -24,15 +31,6 @@ export interface ApiDefinition {
     accessTokens: {
       destroy: typeof routes['profile.access_tokens.destroy']
     }
-    menu: {
-      show: typeof routes['profile.menu.show']
-      window: typeof routes['profile.menu.window']
-    }
-    customerOrders: {
-      index: typeof routes['profile.customer_orders.index']
-      store: typeof routes['profile.customer_orders.store']
-      show: typeof routes['profile.customer_orders.show']
-    }
   }
   dishes: {
     dishes: {
@@ -41,6 +39,15 @@ export interface ApiDefinition {
       show: typeof routes['dishes.dishes.show']
       update: typeof routes['dishes.dishes.update']
       destroy: typeof routes['dishes.dishes.destroy']
+    }
+  }
+  accompaniments: {
+    accompaniments: {
+      index: typeof routes['accompaniments.accompaniments.index']
+      store: typeof routes['accompaniments.accompaniments.store']
+      show: typeof routes['accompaniments.accompaniments.show']
+      update: typeof routes['accompaniments.accompaniments.update']
+      destroy: typeof routes['accompaniments.accompaniments.destroy']
     }
   }
   users: {

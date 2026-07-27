@@ -7,6 +7,29 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class AccompanimentSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'id', 'imagePublicId', 'imageUrl', 'isAvailable', 'name', 'priceCents', 'updatedAt'] as const
+  $columns = AccompanimentSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare imagePublicId: string | null
+  @column()
+  declare imageUrl: string | null
+  @column()
+  declare isAvailable: boolean
+  @column()
+  declare name: string
+  @column()
+  declare priceCents: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
@@ -57,6 +80,33 @@ export class DishSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class NotificationLogSchema extends BaseModel {
+  static $columns = ['body', 'channel', 'createdAt', 'error', 'id', 'kind', 'orderId', 'providerMessageId', 'recipient', 'status', 'updatedAt'] as const
+  $columns = NotificationLogSchema.$columns
+  @column()
+  declare body: string | null
+  @column()
+  declare channel: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare error: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare kind: string
+  @column()
+  declare orderId: number | null
+  @column()
+  declare providerMessageId: string | null
+  @column()
+  declare recipient: string
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class OrderEventSchema extends BaseModel {
   static $columns = ['createdAt', 'id', 'orderId', 'status'] as const
   $columns = OrderEventSchema.$columns
@@ -68,6 +118,25 @@ export class OrderEventSchema extends BaseModel {
   declare orderId: number
   @column()
   declare status: string
+}
+
+export class OrderItemAccompanimentSchema extends BaseModel {
+  static $columns = ['accompanimentId', 'createdAt', 'id', 'name', 'orderItemId', 'priceCents', 'updatedAt'] as const
+  $columns = OrderItemAccompanimentSchema.$columns
+  @column()
+  declare accompanimentId: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column()
+  declare orderItemId: number
+  @column()
+  declare priceCents: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class OrderItemSchema extends BaseModel {
@@ -92,7 +161,7 @@ export class OrderItemSchema extends BaseModel {
 }
 
 export class OrderSchema extends BaseModel {
-  static $columns = ['address', 'code', 'createdAt', 'deliveryDate', 'deliveryFeeCents', 'deliveryTime', 'id', 'landmark', 'mode', 'note', 'paymentMethod', 'paymentStatus', 'status', 'totalCents', 'updatedAt', 'userId'] as const
+  static $columns = ['address', 'code', 'createdAt', 'customerName', 'customerPhone', 'deliveryDate', 'deliveryFeeCents', 'deliveryTime', 'id', 'landmark', 'mode', 'note', 'paymentMethod', 'paymentStatus', 'status', 'totalCents', 'updatedAt', 'userId'] as const
   $columns = OrderSchema.$columns
   @column()
   declare address: string | null
@@ -100,6 +169,10 @@ export class OrderSchema extends BaseModel {
   declare code: string
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare customerName: string | null
+  @column()
+  declare customerPhone: string | null
   @column.date()
   declare deliveryDate: DateTime
   @column()
@@ -125,7 +198,24 @@ export class OrderSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
-  declare userId: number
+  declare userId: number | null
+}
+
+export class ProgramDishAccompanimentSchema extends BaseModel {
+  static $columns = ['accompanimentId', 'createdAt', 'id', 'priceCents', 'programDishId', 'updatedAt'] as const
+  $columns = ProgramDishAccompanimentSchema.$columns
+  @column()
+  declare accompanimentId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare priceCents: number
+  @column()
+  declare programDishId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class ProgramDishSchema extends BaseModel {

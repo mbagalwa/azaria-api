@@ -1,10 +1,17 @@
 import { ProgramDishSchema } from '#database/schema'
 import Dish from '#models/dish'
-import { belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import ProgramDishAccompaniment from '#models/program_dish_accompaniment'
+import { belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
-/** Un plat programmé à une date donnée, au sein d'un programme. */
+/**
+ * LE plat du jour d'un programme (un seul par date, cf. l'unicité
+ * program_id + scheduled_date), avec les accompagnements proposés avec lui.
+ */
 export default class ProgramDish extends ProgramDishSchema {
   @belongsTo(() => Dish, { foreignKey: 'dishId' })
   declare dish: BelongsTo<typeof Dish>
+
+  @hasMany(() => ProgramDishAccompaniment, { foreignKey: 'programDishId' })
+  declare accompaniments: HasMany<typeof ProgramDishAccompaniment>
 }

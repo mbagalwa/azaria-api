@@ -16,7 +16,7 @@ export default class extends BaseSchema {
     /** Backfill des entrées existantes avec le prix catalogue actuel. */
     this.defer(async (db) => {
       await db.rawQuery(
-        'update program_dishes set price_cents = dishes.price_cents from dishes where dishes.id = program_dishes.dish_id',
+        'update program_dishes set price_cents = dishes.price_cents from dishes where dishes.id = program_dishes.dish_id'
       )
     })
   }

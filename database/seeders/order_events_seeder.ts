@@ -55,6 +55,8 @@ export default class extends BaseSeeder {
       touched++
     }
 
-    console.log(`→ Timeline : ${touched} commande(s) backfillée(s), ${orders.length - touched} déjà historisée(s).`)
+    console.log(
+      `→ Timeline : ${touched} commande(s) backfillée(s), ${orders.length - touched} déjà historisée(s).`
+    )
   }
 }

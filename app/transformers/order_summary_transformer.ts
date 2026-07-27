@@ -1,4 +1,5 @@
 import type Order from '#models/order'
+import { orderCustomer, orderEvents, orderItems } from '#transformers/order_customer'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 
 /** Forme « résumé » d'une commande pour les listes et le calendrier. */
@@ -20,28 +21,10 @@ export default class OrderSummaryTransformer extends BaseTransformer<Order> {
       landmark: o.landmark,
       note: o.note,
       itemsCount: (o.items ?? []).reduce((sum, i) => sum + i.quantity, 0),
-      items: (o.items ?? []).map((i) => ({
-        id: i.id,
-        dishId: i.dishId,
-        name: i.name,
-        priceCents: i.priceCents,
-        quantity: i.quantity,
-      })),
-      customer: {
-        id: o.customer.id,
-        fullName: o.customer.fullName,
-        email: o.customer.email,
-        initials: o.customer.initials,
-      },
+      items: orderItems(o),
+      customer: orderCustomer(o),
       /** Historique du cycle (croissant) pour la timeline. */
-      events: (o.events ?? [])
-        .slice()
-        .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
-        .map((e) => ({
-          id: e.id,
-          status: e.status,
-          createdAt: e.createdAt.toISO(),
-        })),
+      events: orderEvents(o),
       createdAt: o.createdAt.toISO(),
     }
   }

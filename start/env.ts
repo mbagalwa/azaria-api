@@ -41,4 +41,20 @@ export default await Env.create(new URL('../', import.meta.url), {
   CLOUDINARY_CLOUD_NAME: Env.schema.string(),
   CLOUDINARY_API_KEY: Env.schema.string(),
   CLOUDINARY_API_SECRET: Env.schema.string(),
+
+  /**
+   * WhatsApp Cloud API (Meta) — canal de suivi du client. Optionnel : sans
+   * jeton, les envois sont journalisés en « skipped » et rien ne casse.
+   */
+  WHATSAPP_TOKEN: Env.schema.string.optional(),
+  WHATSAPP_PHONE_NUMBER_ID: Env.schema.string.optional(),
+  WHATSAPP_API_VERSION: Env.schema.string.optional(),
+  WHATSAPP_TEMPLATE_LANG: Env.schema.string.optional(),
+
+  /** Bot Telegram — alertes internes de l'équipe. Optionnel également. */
+  TELEGRAM_BOT_TOKEN: Env.schema.string.optional(),
+
+  /** URLs publiques, utilisées pour les liens dans les messages envoyés. */
+  CUSTOMER_APP_URL: Env.schema.string.optional(),
+  ADMIN_APP_URL: Env.schema.string.optional(),
 })

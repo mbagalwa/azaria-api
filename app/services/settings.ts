@@ -20,11 +20,24 @@ export type RestaurantSettings = {
 
 export type NotificationsSettings = {
   emailEnabled: boolean
+  /** Canal client : accusé de réception + suivi de statut. */
   whatsappEnabled: boolean
   senderEmail: string | null
+  /** Numéro WhatsApp de l'ÉQUIPE, destinataire des alertes internes. */
   whatsappNumber: string | null
+  /** Canal interne : alerte de l'équipe à chaque nouvelle commande. */
+  telegramEnabled: boolean
+  /** Chat (ou groupe) Telegram qui reçoit les alertes. */
+  telegramChatId: string | null
   notifyNewOrder: boolean
   notifyStatusChange: boolean
+  /**
+   * Noms des templates Meta approuvés. Obligatoires en production : hors de la
+   * fenêtre de service de 24 h, WhatsApp refuse le texte libre. Laissés vides,
+   * on tente un message texte (suffisant en test).
+   */
+  whatsappTemplateOrderReceived: string | null
+  whatsappTemplateStatusChange: string | null
 }
 
 /** Devise verrouillée en USD (stockée en centimes ailleurs). */
@@ -43,11 +56,15 @@ export const DEFAULT_RESTAURANT: RestaurantSettings = {
 
 export const DEFAULT_NOTIFICATIONS: NotificationsSettings = {
   emailEnabled: false,
-  whatsappEnabled: false,
+  whatsappEnabled: true,
   senderEmail: null,
   whatsappNumber: null,
+  telegramEnabled: false,
+  telegramChatId: null,
   notifyNewOrder: true,
   notifyStatusChange: true,
+  whatsappTemplateOrderReceived: null,
+  whatsappTemplateStatusChange: null,
 }
 
 /** Lit un groupe et le fusionne aux valeurs par défaut (tolérant au JSON cassé). */
@@ -65,11 +82,11 @@ async function readGroup<T extends object>(key: string, defaults: T): Promise<T>
 async function saveGroup<T extends object>(
   key: string,
   defaults: T,
-  patch: Partial<T>,
+  patch: Partial<T>
 ): Promise<T> {
   const current = await readGroup(key, defaults)
   const clean = Object.fromEntries(
-    Object.entries(patch).filter(([, v]) => v !== undefined),
+    Object.entries(patch).filter(([, v]) => v !== undefined)
   ) as Partial<T>
   const value = { ...current, ...clean }
 

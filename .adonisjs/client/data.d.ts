@@ -5,7 +5,9 @@
 
 /// <reference path="./manifest.d.ts" />
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
+import type AccompanimentTransformer from '#transformers/accompaniment_transformer'
 import type DishTransformer from '#transformers/dish_transformer'
+import type OrderCustomerTransformer from '#transformers/order_customer'
 import type OrderDetailTransformer from '#transformers/order_detail_transformer'
 import type OrderSummaryTransformer from '#transformers/order_summary_transformer'
 import type ProgramDetailTransformer from '#transformers/program_detail_transformer'
@@ -13,9 +15,17 @@ import type ProgramSummaryTransformer from '#transformers/program_summary_transf
 import type UserTransformer from '#transformers/user_transformer'
 
 export namespace Data {
+  export type Accompaniment = InferData<AccompanimentTransformer>
+  export namespace Accompaniment {
+    export type Variants = InferVariants<AccompanimentTransformer>
+  }
   export type Dish = InferData<DishTransformer>
   export namespace Dish {
     export type Variants = InferVariants<DishTransformer>
+  }
+  export type OrderCustomer = InferData<OrderCustomerTransformer>
+  export namespace OrderCustomer {
+    export type Variants = InferVariants<OrderCustomerTransformer>
   }
   export type OrderDetail = InferData<OrderDetailTransformer>
   export namespace OrderDetail {

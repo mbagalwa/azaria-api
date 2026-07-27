@@ -1,8 +1,5 @@
 import { getSettings, saveNotifications, saveRestaurant } from '#services/settings'
-import {
-  notificationsSettingsValidator,
-  restaurantSettingsValidator,
-} from '#validators/settings'
+import { notificationsSettingsValidator, restaurantSettingsValidator } from '#validators/settings'
 import { Exception } from '@adonisjs/core/exceptions'
 import type { HttpContext } from '@adonisjs/core/http'
 

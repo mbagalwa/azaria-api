@@ -7,22 +7,25 @@ export type ScannedRoutes = {
     'event_stream': { paramsTuple?: []; params?: {} }
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
+    'public.public_menu.show': { paramsTuple?: []; params?: {} }
+    'public.public_menu.week': { paramsTuple?: []; params?: {} }
+    'public.public_menu.window': { paramsTuple?: []; params?: {} }
+    'public.public_orders.store': { paramsTuple?: []; params?: {} }
+    'public.public_orders.show': { paramsTuple: [ParamValue]; params: {'code': ParamValue} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
-    'auth.customer_auth.signup': { paramsTuple?: []; params?: {} }
-    'auth.customer_auth.login': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
-    'profile.menu.show': { paramsTuple?: []; params?: {} }
-    'profile.menu.window': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.index': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.store': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'dishes.dishes.index': { paramsTuple?: []; params?: {} }
     'dishes.dishes.store': { paramsTuple?: []; params?: {} }
     'dishes.dishes.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'dishes.dishes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'dishes.dishes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.index': { paramsTuple?: []; params?: {} }
+    'accompaniments.accompaniments.store': { paramsTuple?: []; params?: {} }
+    'accompaniments.accompaniments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.users.index': { paramsTuple?: []; params?: {} }
     'users.users.store': { paramsTuple?: []; params?: {} }
     'users.users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -44,13 +47,15 @@ export type ScannedRoutes = {
   }
   GET: {
     'event_stream': { paramsTuple?: []; params?: {} }
+    'public.public_menu.show': { paramsTuple?: []; params?: {} }
+    'public.public_menu.week': { paramsTuple?: []; params?: {} }
+    'public.public_menu.window': { paramsTuple?: []; params?: {} }
+    'public.public_orders.show': { paramsTuple: [ParamValue]; params: {'code': ParamValue} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
-    'profile.menu.show': { paramsTuple?: []; params?: {} }
-    'profile.menu.window': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.index': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'dishes.dishes.index': { paramsTuple?: []; params?: {} }
     'dishes.dishes.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.index': { paramsTuple?: []; params?: {} }
+    'accompaniments.accompaniments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.users.index': { paramsTuple?: []; params?: {} }
     'users.users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'settings.settings.show': { paramsTuple?: []; params?: {} }
@@ -62,13 +67,15 @@ export type ScannedRoutes = {
   }
   HEAD: {
     'event_stream': { paramsTuple?: []; params?: {} }
+    'public.public_menu.show': { paramsTuple?: []; params?: {} }
+    'public.public_menu.week': { paramsTuple?: []; params?: {} }
+    'public.public_menu.window': { paramsTuple?: []; params?: {} }
+    'public.public_orders.show': { paramsTuple: [ParamValue]; params: {'code': ParamValue} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
-    'profile.menu.show': { paramsTuple?: []; params?: {} }
-    'profile.menu.window': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.index': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'dishes.dishes.index': { paramsTuple?: []; params?: {} }
     'dishes.dishes.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.index': { paramsTuple?: []; params?: {} }
+    'accompaniments.accompaniments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.users.index': { paramsTuple?: []; params?: {} }
     'users.users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'settings.settings.show': { paramsTuple?: []; params?: {} }
@@ -81,18 +88,18 @@ export type ScannedRoutes = {
   POST: {
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
+    'public.public_orders.store': { paramsTuple?: []; params?: {} }
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
-    'auth.customer_auth.signup': { paramsTuple?: []; params?: {} }
-    'auth.customer_auth.login': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
-    'profile.customer_orders.store': { paramsTuple?: []; params?: {} }
     'dishes.dishes.store': { paramsTuple?: []; params?: {} }
+    'accompaniments.accompaniments.store': { paramsTuple?: []; params?: {} }
     'users.users.store': { paramsTuple?: []; params?: {} }
     'programs.programs.store': { paramsTuple?: []; params?: {} }
   }
   PUT: {
     'dishes.dishes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'settings.settings.update_restaurant': { paramsTuple?: []; params?: {} }
     'settings.settings.update_notifications': { paramsTuple?: []; params?: {} }
@@ -102,6 +109,7 @@ export type ScannedRoutes = {
   }
   DELETE: {
     'dishes.dishes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'accompaniments.accompaniments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'programs.programs.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }

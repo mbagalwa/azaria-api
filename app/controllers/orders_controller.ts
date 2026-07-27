@@ -3,6 +3,7 @@ import OrderEvent from '#models/order_event'
 import OrderDetailTransformer from '#transformers/order_detail_transformer'
 import OrderSummaryTransformer from '#transformers/order_summary_transformer'
 import { notifyOrderUpdated, notifyPaymentUpdated } from '#services/realtime'
+import { dispatchPaymentChanged, dispatchStatusChanged, queue } from '#services/notifications/index'
 import { nowLocal, dayInBusinessTz, parseHmToMinutes } from '#services/clock'
 import { Exception } from '@adonisjs/core/exceptions'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -44,7 +45,7 @@ export default class OrdersController {
 
     const query = Order.query()
       .preload('customer')
-      .preload('items')
+      .preload('items', (q) => q.preload('accompaniments'))
       .preload('events')
       .orderBy('delivery_date', 'asc')
       .orderBy('delivery_time', 'asc')
@@ -53,9 +54,7 @@ export default class OrdersController {
     if (ISO_DATE.test(to)) query.where('delivery_date', '<=', to)
 
     const paginator = await query.paginate(page, limit)
-    return ctx.serialize(
-      OrderSummaryTransformer.paginate(paginator.all(), paginator.getMeta()),
-    )
+    return ctx.serialize(OrderSummaryTransformer.paginate(paginator.all(), paginator.getMeta()))
   }
 
   /**
@@ -76,7 +75,10 @@ export default class OrdersController {
 
     const byStatus: Record<string, number> = {}
     const byMode: Record<string, number> = { delivery: 0, pickup: 0 }
-    const dishMap = new Map<string, { dishId: number | null; name: string; quantity: number; revenueCents: number }>()
+    const dishMap = new Map<
+      string,
+      { dishId: number | null; name: string; quantity: number; revenueCents: number }
+    >()
     const dailyMap = new Map<string, { grossCents: number; orders: number }>()
     let grossCents = 0
     let paidCents = 0
@@ -108,7 +110,12 @@ export default class OrdersController {
       }
       for (const it of o.items) {
         const key = it.dishId !== null ? `dish:${it.dishId}` : `name:${it.name}`
-        const cur = dishMap.get(key) ?? { dishId: it.dishId, name: it.name, quantity: 0, revenueCents: 0 }
+        const cur = dishMap.get(key) ?? {
+          dishId: it.dishId,
+          name: it.name,
+          quantity: 0,
+          revenueCents: 0,
+        }
         cur.quantity += it.quantity
         cur.revenueCents += it.priceCents * it.quantity
         dishMap.set(key, cur)
@@ -123,9 +130,7 @@ export default class OrdersController {
       }
     }
 
-    const topDishes = [...dishMap.values()]
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 8)
+    const topDishes = [...dishMap.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 8)
 
     const daily = [...dailyMap.entries()]
       .map(([date, v]) => ({ date, grossCents: v.grossCents, orders: v.orders }))
@@ -172,7 +177,7 @@ export default class OrdersController {
         TERMINAL.has(order.status)
           ? 'Cette commande est terminée : son statut ne peut plus changer.'
           : 'Transition de statut non autorisée.',
-        { status: 422, code: 'E_INVALID_TRANSITION' },
+        { status: 422, code: 'E_INVALID_TRANSITION' }
       )
     }
 
@@ -182,11 +187,12 @@ export default class OrdersController {
     await order.load('events')
     notifyOrderUpdated({
       id: order.id,
-      userId: order.userId,
       code: order.code,
       status: order.status,
       deliveryDate: order.deliveryDate.toISODate(),
     })
+    /** Le client n'a pas de compte : WhatsApp est son seul canal de suivi. */
+    queue(() => dispatchStatusChanged(order))
 
     return ctx.serialize(OrderSummaryTransformer.transform(order))
   }
@@ -216,11 +222,11 @@ export default class OrdersController {
       await order.save()
       notifyPaymentUpdated({
         id: order.id,
-        userId: order.userId,
         code: order.code,
         paymentStatus,
         deliveryDate: order.deliveryDate.toISODate(),
       })
+      queue(() => dispatchPaymentChanged(order))
     }
 
     return ctx.serialize(OrderSummaryTransformer.transform(order))
@@ -230,7 +236,7 @@ export default class OrdersController {
     const order = await Order.query()
       .where('id', id)
       .preload('customer')
-      .preload('items')
+      .preload('items', (q) => q.preload('accompaniments'))
       .preload('events')
       .first()
     if (!order) {

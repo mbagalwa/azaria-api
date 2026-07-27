@@ -18,23 +18,27 @@ export const programValidator = vine.create({
   startDate: isoDate(),
   endDate: isoDate(),
   /**
-   * Assignations : une entrée par date programmée (dates vides = absentes).
-   * Chaque plat porte son PRIX FIGÉ (celui que le client paiera), par défaut
-   * le prix catalogue au moment de la programmation, modifiable par l'admin.
+   * Assignations : UNE entrée par date programmée (dates vides = absentes), et
+   * UN SEUL plat par date — c'est le plat du jour. Le plat porte son PRIX FIGÉ
+   * (celui que le client paiera), par défaut le prix catalogue au moment de la
+   * programmation, modifiable par l'admin. Ses accompagnements sont figés de la
+   * même façon.
    */
   entries: vine
     .array(
       vine.object({
         date: isoDate(),
-        dishes: vine
+        dishId: vine.number().positive(),
+        priceCents: vine.number().withoutDecimals().min(0).max(100_000_000),
+        accompaniments: vine
           .array(
             vine.object({
-              dishId: vine.number().positive(),
+              accompanimentId: vine.number().positive(),
               priceCents: vine.number().withoutDecimals().min(0).max(100_000_000),
-            }),
+            })
           )
-          .minLength(1),
-      }),
+          .optional(),
+      })
     )
     .optional(),
 })

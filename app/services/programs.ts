@@ -1,8 +1,11 @@
+import Accompaniment from '#models/accompaniment'
 import Dish from '#models/dish'
 import Program from '#models/program'
 import ProgramDish from '#models/program_dish'
+import ProgramDishAccompaniment from '#models/program_dish_accompaniment'
 import { Exception } from '@adonisjs/core/exceptions'
 import db from '@adonisjs/lucid/services/db'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 import { randomBytes } from 'node:crypto'
 
@@ -29,24 +32,35 @@ export async function generateUniqueProgramCode(): Promise<string> {
   })
 }
 
+export type ProgramEntryInput = {
+  date: string
+  dishId: number
+  priceCents: number
+  accompaniments?: { accompanimentId: number; priceCents: number }[]
+}
+
 export type ProgramInput = {
   title?: string | null
   description?: string | null
   startDate: string
   endDate: string
-  entries?: { date: string; dishes: { dishId: number; priceCents: number }[] }[]
+  /** Une entrée par date : LE plat du jour et ses accompagnements. */
+  entries?: ProgramEntryInput[]
 }
 
-type PreparedEntries = {
-  rows: { scheduledDate: DateTime; dishId: number; priceCents: number }[]
+type PreparedRow = {
+  scheduledDate: DateTime
+  dishId: number
+  priceCents: number
+  accompaniments: { accompanimentId: number; priceCents: number }[]
 }
 
 /**
- * Valide le payload (fin ≥ début, dates dans l'intervalle, plats existants)
- * et aplatit les entrées en lignes program_dishes dédoublonnées (le prix figé
- * de chaque plat est celui fourni par l'admin).
+ * Valide le payload (fin ≥ début, dates dans l'intervalle, une seule entrée par
+ * date, plats et accompagnements existants) et le normalise en lignes prêtes à
+ * insérer. Les prix fournis par l'admin sont figés tels quels.
  */
-async function prepare(input: ProgramInput): Promise<PreparedEntries> {
+async function prepare(input: ProgramInput): Promise<PreparedRow[]> {
   const start = DateTime.fromISO(input.startDate)
   const end = DateTime.fromISO(input.endDate)
   if (!start.isValid || !end.isValid) {
@@ -59,8 +73,10 @@ async function prepare(input: ProgramInput): Promise<PreparedEntries> {
     })
   }
 
-  const rows: { scheduledDate: DateTime; dishId: number; priceCents: number }[] = []
-  const allDishIds = new Set<number>()
+  const rows: PreparedRow[] = []
+  const usedDates = new Set<string>()
+  const dishIds = new Set<number>()
+  const accompanimentIds = new Set<number>()
 
   for (const entry of input.entries ?? []) {
     const date = DateTime.fromISO(entry.date)
@@ -70,32 +86,100 @@ async function prepare(input: ProgramInput): Promise<PreparedEntries> {
         code: 'E_DATE_OUT_OF_RANGE',
       })
     }
-    const seen = new Set<number>()
-    for (const dish of entry.dishes) {
-      if (seen.has(dish.dishId)) continue
-      seen.add(dish.dishId)
-      allDishIds.add(dish.dishId)
-      rows.push({ scheduledDate: date, dishId: dish.dishId, priceCents: dish.priceCents })
-    }
-  }
-
-  if (allDishIds.size > 0) {
-    const found = await Dish.query().whereIn('id', [...allDishIds]).count('* as total')
-    const total = Number(found[0].$extras.total)
-    if (total !== allDishIds.size) {
-      throw new Exception('Un ou plusieurs plats sélectionnés sont introuvables.', {
+    if (usedDates.has(entry.date)) {
+      throw new Exception(`Un seul plat par jour : ${entry.date} est en double.`, {
         status: 422,
-        code: 'E_DISH_NOT_FOUND',
+        code: 'E_DUPLICATE_DATE',
       })
     }
+    usedDates.add(entry.date)
+    dishIds.add(entry.dishId)
+
+    /** Dédoublonne les accompagnements d'une même date (1re occurrence gagnante). */
+    const seen = new Set<number>()
+    const accompaniments: { accompanimentId: number; priceCents: number }[] = []
+    for (const a of entry.accompaniments ?? []) {
+      if (seen.has(a.accompanimentId)) continue
+      seen.add(a.accompanimentId)
+      accompanimentIds.add(a.accompanimentId)
+      accompaniments.push({ accompanimentId: a.accompanimentId, priceCents: a.priceCents })
+    }
+
+    rows.push({
+      scheduledDate: date,
+      dishId: entry.dishId,
+      priceCents: entry.priceCents,
+      accompaniments,
+    })
   }
 
-  return { rows }
+  await assertAllExist(
+    Dish,
+    dishIds,
+    'Un ou plusieurs plats sélectionnés sont introuvables.',
+    'E_DISH_NOT_FOUND'
+  )
+  await assertAllExist(
+    Accompaniment,
+    accompanimentIds,
+    'Un ou plusieurs accompagnements sélectionnés sont introuvables.',
+    'E_ACCOMPANIMENT_NOT_FOUND'
+  )
+
+  return rows
+}
+
+/** Vérifie en une requête que tous les ids existent bien. */
+async function assertAllExist(
+  model: typeof Dish | typeof Accompaniment,
+  ids: Set<number>,
+  message: string,
+  code: string
+): Promise<void> {
+  if (ids.size === 0) return
+  const found = await model
+    .query()
+    .whereIn('id', [...ids])
+    .count('* as total')
+  if (Number(found[0].$extras.total) !== ids.size) {
+    throw new Exception(message, { status: 422, code })
+  }
+}
+
+/** Insère les entrées d'un programme puis leurs accompagnements. */
+async function insertEntries(
+  trx: TransactionClientContract,
+  programId: number,
+  rows: PreparedRow[]
+): Promise<void> {
+  if (!rows.length) return
+
+  const created = await ProgramDish.createMany(
+    rows.map((r) => ({
+      programId,
+      scheduledDate: r.scheduledDate,
+      dishId: r.dishId,
+      priceCents: r.priceCents,
+    })),
+    { client: trx }
+  )
+
+  /** `createMany` conserve l'ordre : la i-ème ligne correspond à la i-ème entrée. */
+  const links = created.flatMap((programDish, i) =>
+    rows[i].accompaniments.map((a) => ({
+      programDishId: programDish.id,
+      accompanimentId: a.accompanimentId,
+      priceCents: a.priceCents,
+    }))
+  )
+  if (links.length) {
+    await ProgramDishAccompaniment.createMany(links, { client: trx })
+  }
 }
 
 /** Crée un programme et ses entrées dans une transaction. */
 export async function createProgram(input: ProgramInput): Promise<Program> {
-  const { rows } = await prepare(input)
+  const rows = await prepare(input)
   const code = await generateUniqueProgramCode()
 
   return db.transaction(async (trx) => {
@@ -107,21 +191,16 @@ export async function createProgram(input: ProgramInput): Promise<Program> {
         startDate: DateTime.fromISO(input.startDate),
         endDate: DateTime.fromISO(input.endDate),
       },
-      { client: trx },
+      { client: trx }
     )
-    if (rows.length) {
-      await ProgramDish.createMany(
-        rows.map((r) => ({ ...r, programId: program.id })),
-        { client: trx },
-      )
-    }
+    await insertEntries(trx, program.id, rows)
     return program
   })
 }
 
 /** Met à jour un programme et remplace intégralement ses entrées. */
 export async function updateProgram(program: Program, input: ProgramInput): Promise<Program> {
-  const { rows } = await prepare(input)
+  const rows = await prepare(input)
 
   return db.transaction(async (trx) => {
     program.useTransaction(trx)
@@ -133,13 +212,9 @@ export async function updateProgram(program: Program, input: ProgramInput): Prom
     })
     await program.save()
 
+    /** CASCADE : supprimer les entrées emporte leurs accompagnements. */
     await ProgramDish.query({ client: trx }).where('program_id', program.id).delete()
-    if (rows.length) {
-      await ProgramDish.createMany(
-        rows.map((r) => ({ ...r, programId: program.id })),
-        { client: trx },
-      )
-    }
+    await insertEntries(trx, program.id, rows)
     return program
   })
 }

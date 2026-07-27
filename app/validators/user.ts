@@ -26,7 +26,11 @@ export const loginValidator = vine.create({
 })
 
 /** Numéro de téléphone/WhatsApp (format souple : +, chiffres, espaces). */
-const phone = () => vine.string().trim().regex(/^\+?[0-9\s]{8,20}$/)
+const phone = () =>
+  vine
+    .string()
+    .trim()
+    .regex(/^\+?[0-9\s]{8,20}$/)
 
 /** Inscription client via l'app : identifiant = numéro WhatsApp. */
 export const customerSignupValidator = vine.create({

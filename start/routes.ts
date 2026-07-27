@@ -21,13 +21,26 @@ router.get('/', () => {
 
 router
   .group(() => {
+    /**
+     * Espace PUBLIC — aucune authentification. Le client commande sans compte :
+     * il consulte le menu, poste sa commande et la suit avec son code.
+     */
+    router
+      .group(() => {
+        router.get('menu', [controllers.PublicMenu, 'show'])
+        router.get('menu/week', [controllers.PublicMenu, 'week'])
+        router.get('ordering-window', [controllers.PublicMenu, 'window'])
+        router.post('orders', [controllers.PublicOrders, 'store'])
+        router.get('orders/:code', [controllers.PublicOrders, 'show'])
+      })
+      .prefix('public')
+      .as('public')
+
+    // Auth STAFF uniquement (back-office).
     router
       .group(() => {
         router.post('signup', [controllers.NewAccount, 'store'])
         router.post('login', [controllers.AccessTokens, 'store'])
-        // Auth CLIENT (app) : par numéro WhatsApp.
-        router.post('customer/signup', [controllers.CustomerAuth, 'signup'])
-        router.post('customer/login', [controllers.CustomerAuth, 'login'])
       })
       .prefix('auth')
       .as('auth')
@@ -36,12 +49,6 @@ router
       .group(() => {
         router.get('profile', [controllers.Profile, 'show'])
         router.post('logout', [controllers.AccessTokens, 'destroy'])
-        // Espace client : menu du jour + ses commandes.
-        router.get('menu', [controllers.Menu, 'show'])
-        router.get('ordering-window', [controllers.Menu, 'window'])
-        router.get('orders', [controllers.CustomerOrders, 'index'])
-        router.post('orders', [controllers.CustomerOrders, 'store'])
-        router.get('orders/:id', [controllers.CustomerOrders, 'show'])
       })
       .prefix('account')
       .as('profile')
@@ -57,6 +64,18 @@ router
       })
       .prefix('dishes')
       .as('dishes')
+      .use(middleware.auth())
+
+    router
+      .group(() => {
+        router.get('', [controllers.Accompaniments, 'index'])
+        router.post('', [controllers.Accompaniments, 'store'])
+        router.get(':id', [controllers.Accompaniments, 'show'])
+        router.put(':id', [controllers.Accompaniments, 'update'])
+        router.delete(':id', [controllers.Accompaniments, 'destroy'])
+      })
+      .prefix('accompaniments')
+      .as('accompaniments')
       .use(middleware.auth())
 
     router

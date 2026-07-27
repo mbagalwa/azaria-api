@@ -43,6 +43,66 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'public.public_menu.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/public/menu'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['show']>>>
+    }
+  }
+  'public.public_menu.week': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/public/menu/week'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['week']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['week']>>>
+    }
+  }
+  'public.public_menu.window': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/public/ordering-window'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['window']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public_menu_controller').default['window']>>>
+    }
+  }
+  'public.public_orders.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/public/orders'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/public_order').createPublicOrderValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/public_order').createPublicOrderValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public_orders_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public_orders_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'public.public_orders.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/public/orders/:code'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { code: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public_orders_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public_orders_controller').default['show']>>>
+    }
+  }
   'auth.new_account.store': {
     methods: ["POST"]
     pattern: '/api/v1/auth/signup'
@@ -67,30 +127,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'auth.customer_auth.signup': {
-    methods: ["POST"]
-    pattern: '/api/v1/auth/customer/signup'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/user').customerSignupValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/user').customerSignupValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customer_auth_controller').default['signup']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customer_auth_controller').default['signup']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'auth.customer_auth.login': {
-    methods: ["POST"]
-    pattern: '/api/v1/auth/customer/login'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/user').customerLoginValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/user').customerLoginValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customer_auth_controller').default['login']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customer_auth_controller').default['login']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
   'profile.profile.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/account/profile'
@@ -113,66 +149,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
-    }
-  }
-  'profile.menu.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/api/v1/account/menu'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/menu_controller').default['show']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/menu_controller').default['show']>>>
-    }
-  }
-  'profile.menu.window': {
-    methods: ["GET","HEAD"]
-    pattern: '/api/v1/account/ordering-window'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/menu_controller').default['window']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/menu_controller').default['window']>>>
-    }
-  }
-  'profile.customer_orders.index': {
-    methods: ["GET","HEAD"]
-    pattern: '/api/v1/account/orders'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['index']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['index']>>>
-    }
-  }
-  'profile.customer_orders.store': {
-    methods: ["POST"]
-    pattern: '/api/v1/account/orders'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/order').createCustomerOrderValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/order').createCustomerOrderValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['store']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'profile.customer_orders.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/api/v1/account/orders/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['show']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customer_orders_controller').default['show']>>>
     }
   }
   'dishes.dishes.index': {
@@ -233,6 +209,66 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/dishes_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dishes_controller').default['destroy']>>>
+    }
+  }
+  'accompaniments.accompaniments.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/accompaniments'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['index']>>>
+    }
+  }
+  'accompaniments.accompaniments.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/accompaniments'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/accompaniment').createAccompanimentValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/accompaniment').createAccompanimentValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'accompaniments.accompaniments.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/accompaniments/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['show']>>>
+    }
+  }
+  'accompaniments.accompaniments.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/accompaniments/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/accompaniment').updateAccompanimentValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/accompaniment').updateAccompanimentValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'accompaniments.accompaniments.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/accompaniments/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accompaniments_controller').default['destroy']>>>
     }
   }
   'users.users.index': {

@@ -16,9 +16,7 @@ export default class ProgramsController {
       .preload('entries')
       .orderBy('start_date', 'desc')
       .paginate(page, limit)
-    return ctx.serialize(
-      ProgramSummaryTransformer.paginate(paginator.all(), paginator.getMeta()),
-    )
+    return ctx.serialize(ProgramSummaryTransformer.paginate(paginator.all(), paginator.getMeta()))
   }
 
   /** Détail d'un programme : plats par date + stats. */
@@ -60,7 +58,12 @@ export default class ProgramsController {
   private async findWithEntries(id: number | string): Promise<Program> {
     const program = await Program.query()
       .where('id', id)
-      .preload('entries', (q) => q.preload('dish').orderBy('scheduled_date'))
+      .preload('entries', (q) =>
+        q
+          .preload('dish')
+          .preload('accompaniments', (a) => a.preload('accompaniment'))
+          .orderBy('scheduled_date')
+      )
       .first()
     if (!program) this.notFound()
     return program

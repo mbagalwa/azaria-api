@@ -2,10 +2,13 @@ import transmit from '@adonisjs/transmit/services/main'
 
 /**
  * Diffusion temps réel (SSE) des signaux de commande. Les payloads restent
- * minimaux (ids/statuts) : les fronts re-fetchent la donnée réelle via leurs
- * routes authentifiées. Deux canaux :
- *  - `admin/orders`      → le back-office (nouvelles commandes + changements)
- *  - `orders/user/:id`   → l'app cliente (statut de SES commandes)
+ * minimaux (code/statut) : les fronts re-fetchent la donnée réelle. Deux canaux :
+ *  - `admin/orders`        → le back-office (nouvelles commandes + changements)
+ *  - `orders/code/:code`   → la page de suivi du client
+ *
+ * Le canal client est indexé par le CODE de commande (et non plus par un id
+ * utilisateur, qui n'existe plus) : c'est le secret que le client détient via
+ * son lien de suivi, contrairement à un id séquentiel énumérable.
  */
 export function notifyOrderCreated(order: {
   id: number
@@ -22,7 +25,6 @@ export function notifyOrderCreated(order: {
 
 export function notifyOrderUpdated(order: {
   id: number
-  userId: number
   code: string
   status: string
   deliveryDate: string | null
@@ -33,7 +35,7 @@ export function notifyOrderUpdated(order: {
     status: order.status,
     date: order.deliveryDate,
   })
-  transmit.broadcast(`orders/user/${order.userId}`, {
+  transmit.broadcast(`orders/code/${order.code}`, {
     id: order.id,
     code: order.code,
     status: order.status,
@@ -42,7 +44,6 @@ export function notifyOrderUpdated(order: {
 
 export function notifyPaymentUpdated(order: {
   id: number
-  userId: number
   code: string
   paymentStatus: string
   deliveryDate: string | null
@@ -52,7 +53,7 @@ export function notifyPaymentUpdated(order: {
     id: order.id,
     date: order.deliveryDate,
   })
-  transmit.broadcast(`orders/user/${order.userId}`, {
+  transmit.broadcast(`orders/code/${order.code}`, {
     id: order.id,
     code: order.code,
     paymentStatus: order.paymentStatus,
