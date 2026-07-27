@@ -3,7 +3,11 @@ import type Order from '#models/order'
 import env from '#start/env'
 import { getSettings } from '#services/settings'
 import { normalizePhone } from '#services/phone'
-import { sendWhatsApp, type SendResult } from '#services/notifications/whatsapp'
+import {
+  sendWhatsApp,
+  type SendResult,
+  type TemplateParams,
+} from '#services/notifications/whatsapp'
 import { sendTelegram } from '#services/notifications/telegram'
 import * as copy from '#services/notifications/messages'
 import logger from '@adonisjs/core/services/logger'
@@ -105,7 +109,7 @@ async function toCustomer(
   kind: Kind,
   body: string,
   template: string | null,
-  params: string[]
+  params: TemplateParams
 ): Promise<void> {
   const to = normalizePhone(order.customerPhone)
   if (!to) {
@@ -131,12 +135,7 @@ export async function dispatchOrderCreated(order: Order): Promise<void> {
       'order_received',
       copy.customerOrderReceived(payload, link),
       notifications.whatsappTemplateOrderReceived,
-      [
-        payload.customerName,
-        order.code,
-        copy.formatDateFr(payload.deliveryDate),
-        payload.deliveryTime,
-      ]
+      copy.orderReceivedTemplate(payload)
     )
   }
 
@@ -174,7 +173,7 @@ export async function dispatchStatusChanged(order: Order): Promise<void> {
     'status_change',
     copy.customerStatusChanged(payload, trackUrl(order.code)),
     notifications.whatsappTemplateStatusChange,
-    [order.code, copy.STATUS_LABELS[order.status] ?? order.status]
+    copy.statusChangedTemplate(payload)
   )
 }
 
@@ -184,5 +183,10 @@ export async function dispatchPaymentChanged(order: Order): Promise<void> {
   if (!notifications.whatsappEnabled || !notifications.notifyStatusChange) return
 
   const payload = toNotifiable(order)
-  await toCustomer(order, 'payment_change', copy.customerPaymentChanged(payload), null, [])
+  /**
+   * Pas de template dédié au paiement : ce message ne part donc QUE dans la
+   * fenêtre de service de 24 h. Hors fenêtre, il sera journalisé en `failed`
+   * — acceptable, c'est la notification la moins critique des trois.
+   */
+  await toCustomer(order, 'payment_change', copy.customerPaymentChanged(payload), null, {})
 }

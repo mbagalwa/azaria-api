@@ -146,3 +146,72 @@ export function staffNewOrder(order: NotifiableOrder, adminUrl: string | null): 
 export function staffNewOrderPlain(order: NotifiableOrder, adminUrl: string | null): string {
   return staffNewOrder(order, adminUrl).replace(/<\/?b>/g, '*')
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Variables des templates WhatsApp approuvés                                */
+/*                                                                            */
+/*  Une valeur de paramètre ne peut PAS contenir de saut de ligne : la liste   */
+/*  des plats à puces du message libre est donc aplatie sur une seule ligne.   */
+/*  Les noms de variables ci-dessous doivent correspondre EXACTEMENT à ceux    */
+/*  déclarés dans WhatsApp Manager.                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Quantité totale d'assiettes de la commande. */
+function totalQuantity(order: NotifiableOrder): number {
+  return order.items.reduce((sum, i) => sum + i.quantity, 0)
+}
+
+/** Les plats sur une seule ligne : « Poulet Moambe » ou « Poulet Moambe + 1 autre ». */
+function dishSummary(order: NotifiableOrder): string {
+  const [first, ...rest] = order.items
+  if (!first) return '—'
+  return rest.length ? `${first.name} + ${rest.length} autre(s)` : first.name
+}
+
+/** Accompagnements choisis, séparés par des virgules. */
+function accompanimentSummary(order: NotifiableOrder): string {
+  const names = order.items.flatMap((i) => i.accompaniments.map((a) => a.name))
+  return names.length ? [...new Set(names)].join(', ') : 'aucun'
+}
+
+/** Où et comment : « Livraison — Av. du Lac 12 » ou « Retrait sur place ». */
+function locationLabel(order: NotifiableOrder): string {
+  if (order.mode === 'pickup') return 'Retrait sur place'
+  return order.address ? `Livraison — ${order.address}` : 'Livraison'
+}
+
+/** Variables du template `azaria_commande_recue`. */
+export function orderReceivedTemplate(order: NotifiableOrder) {
+  return {
+    header: { title: 'Commande bien reçue ✅' },
+    body: {
+      customer: order.customerName,
+      order_id: order.code,
+      qt: String(totalQuantity(order)),
+      dish: dishSummary(order),
+      dish_comple: accompanimentSummary(order),
+      delivery_date: formatDateFr(order.deliveryDate),
+      delivery_hours: order.deliveryTime,
+      location: locationLabel(order),
+      tot_price: formatUsd(order.totalCents),
+    },
+    buttonUrlSuffix: order.code,
+  }
+}
+
+/** Variables du template `azaria_suivi_commande`. */
+export function statusChangedTemplate(order: NotifiableOrder) {
+  return {
+    header: { title: 'Suivi de votre commande' },
+    body: {
+      customer: order.customerName,
+      order_id: order.code,
+      status: STATUS_LABELS[order.status] ?? order.status,
+      /** Repli obligatoire : une variable vide fait échouer l'envoi. */
+      status_line: STATUS_LINES[order.status] ?? 'Nous vous tenons informé.',
+      mode: modeLabel(order.mode),
+      delivery_when: `${formatDateFr(order.deliveryDate)} à ${order.deliveryTime}`,
+    },
+    buttonUrlSuffix: order.code,
+  }
+}
