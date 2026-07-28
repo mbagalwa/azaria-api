@@ -180,10 +180,23 @@ function locationLabel(order: NotifiableOrder): string {
   return order.address ? `Livraison — ${order.address}` : 'Livraison'
 }
 
-/** Variables du template `azaria_commande_recue`. */
+/**
+ * Suffixe du bouton « Suivre ma commande ». Le template ne fige que la BASE de
+ * l'URL : le chemin de la page de suivi fait donc partie du suffixe dynamique.
+ */
+function trackingSuffix(order: NotifiableOrder): string {
+  return `commande/${order.code}`
+}
+
+/**
+ * Variables du template `new_order` (accusé de réception).
+ * Les noms proviennent du modèle approuvé — les renommer ici sans les renommer
+ * dans WhatsApp Manager fait échouer l'envoi.
+ */
 export function orderReceivedTemplate(order: NotifiableOrder) {
   return {
-    header: { title: 'Commande bien reçue ✅' },
+    /** Le corps affiche déjà « Commande bien reçue ✅ » : l'en-tête ne le répète pas. */
+    header: { title: 'Accusé de réception 🎉' },
     body: {
       customer: order.customerName,
       order_id: order.code,
@@ -195,23 +208,23 @@ export function orderReceivedTemplate(order: NotifiableOrder) {
       location: locationLabel(order),
       tot_price: formatUsd(order.totalCents),
     },
-    buttonUrlSuffix: order.code,
+    buttonUrlSuffix: trackingSuffix(order),
   }
 }
 
-/** Variables du template `azaria_suivi_commande`. */
+/** Variables du template `order_status` (changement de statut). */
 export function statusChangedTemplate(order: NotifiableOrder) {
   return {
     header: { title: 'Suivi de votre commande' },
     body: {
       customer: order.customerName,
       order_id: order.code,
-      status: STATUS_LABELS[order.status] ?? order.status,
+      order_status: STATUS_LABELS[order.status] ?? order.status,
       /** Repli obligatoire : une variable vide fait échouer l'envoi. */
-      status_line: STATUS_LINES[order.status] ?? 'Nous vous tenons informé.',
-      mode: modeLabel(order.mode),
-      delivery_when: `${formatDateFr(order.deliveryDate)} à ${order.deliveryTime}`,
+      status_label: STATUS_LINES[order.status] ?? 'Nous vous tenons informé.',
+      order_type: modeLabel(order.mode),
+      order_date: `${formatDateFr(order.deliveryDate)} à ${order.deliveryTime}`,
     },
-    buttonUrlSuffix: order.code,
+    buttonUrlSuffix: trackingSuffix(order),
   }
 }
