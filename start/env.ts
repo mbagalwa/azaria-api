@@ -57,4 +57,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   /** URLs publiques, utilisées pour les liens dans les messages envoyés. */
   CUSTOMER_APP_URL: Env.schema.string.optional(),
   ADMIN_APP_URL: Env.schema.string.optional(),
+
+  /**
+   * Origines navigateur autorisées (CORS), séparées par des virgules. Requis
+   * en production pour le temps réel SSE et tout appel front → API depuis le
+   * navigateur (l'admin et le client). Ex. : https://admin.azaria.cd,https://azaria.cd
+   */
+  CORS_ORIGIN: Env.schema.string.optional(),
 })

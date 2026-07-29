@@ -1,0 +1,46 @@
+# Service systemd de l'API Azaria (AdonisJS, Node natif).
+#
+# Installation :
+#   sudo cp deploy/azaria-api.service /etc/systemd/system/azaria-api.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now azaria-api
+#
+# Logs :   journalctl -u azaria-api -f
+#
+# Prérequis : l'app est buildée dans /opt/azaria/azaria-api/build et le fichier
+# build/.env est un lien vers /opt/azaria/shared/.env (voir deploy/deploy.sh).
+
+[Unit]
+Description=Azaria API (AdonisJS)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=azaria
+Group=azaria
+WorkingDirectory=/opt/azaria/azaria-api/build
+
+# Node installé en système (NodeSource) → /usr/bin/node. Adapter si autre chemin.
+ExecStart=/usr/bin/node bin/server.js
+
+# Les autres variables sont lues depuis build/.env par AdonisJS.
+Environment=NODE_ENV=production
+
+Restart=on-failure
+RestartSec=3
+# Laisse le temps aux migrations/au boot ; l'app démarre normalement en <2 s.
+TimeoutStartSec=30
+
+# Durcissement de base.
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=azaria-api
+
+[Install]
+WantedBy=multi-user.target
