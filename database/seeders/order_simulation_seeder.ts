@@ -30,36 +30,50 @@ const CUSTOMERS = [
   { fullName: 'Esther Zawadi', phone: '+243991000107' },
 ]
 
+/**
+ * Cover de démonstration : image food déterministe (`lock`) et relative aux
+ * mots-clés, servie par loremflickr. Uniquement pour le dev/staging — en prod
+ * les vraies images passent par Cloudinary (upload admin → imageUrl/imagePublicId).
+ */
+function demoCover(tags: string, lock: number): string {
+  return `https://loremflickr.com/1200/800/${tags}?lock=${lock}`
+}
+
 const EXTRA_DISHES = [
   {
     name: 'Thomson braisé',
     description: 'Poisson braisé, bananes plantains',
     priceCents: 1000,
     category: 'Plats',
+    imageUrl: demoCover('grilled,fish', 101),
   },
   {
     name: 'Riz aux haricots',
     description: 'Riz parfumé et haricots rouges mijotés',
     priceCents: 500,
     category: 'Plats',
+    imageUrl: demoCover('rice,beans', 102),
   },
   {
     name: 'Brochettes de chèvre',
     description: 'Grillées au feu de bois, sauce pili-pili',
     priceCents: 800,
     category: 'Grillades',
+    imageUrl: demoCover('skewer,barbecue', 103),
   },
   {
     name: 'Poulet Moambe',
     description: 'Poulet mijoté à la sauce de noix de palme',
     priceCents: 900,
     category: 'Plats',
+    imageUrl: demoCover('chicken,stew', 104),
   },
   {
     name: 'Tilapia frit',
     description: 'Tilapia du lac Kivu, frit à la minute',
     priceCents: 950,
     category: 'Plats',
+    imageUrl: demoCover('fried,fish', 105),
   },
 ]
 
